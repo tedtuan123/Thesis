@@ -1,4 +1,4 @@
-package com.example;
+package sample;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -11,6 +11,7 @@ import java.util.Enumeration;
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.math.BigInteger;
+
 public  class SerialTest implements SerialPortEventListener {
 	
 SerialPort serialPort;
@@ -20,22 +21,28 @@ private static final String PORT_NAMES[] = {"COM3", // Mac OS X
         									"COM7", // Windows
         									};
 
-public BufferedReader input;
- OutputStream output;
+private BufferedReader input;
+static OutputStream output;
 private static final int TIME_OUT = 2000;
 private static final int DATA_RATE = 9600;
-
-public static byte[] hexStringToByteArray(String s) {
+public static byte[] data;
+public synchronized static void hexStringToByteArray(String s) throws IOException{
+  
+    if(s!=null){
     int len = s.length();
-    byte[] data = new byte[len / 2];
+     data = new byte[len / 2];
     for (int i = 0; i < len; i += 2) {
         data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
                              + Character.digit(s.charAt(i+1), 16));
     }
-    return data;
+    }
+    else
+            {
+                throw new IOException();
+            }
 }
+
 public void initialize() {
-    
     CommPortIdentifier portId = null;
     Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
     //First, Find an instance of serial port as set in PORT_NAMES.
@@ -44,9 +51,9 @@ public void initialize() {
         for (String portName : PORT_NAMES) {
             if (currPortId.getName().equals(portName)) {
                 portId = currPortId;
-                
+                System.out.println("COM port connected");
                 break;
-                
+          
             }
         }
     }
@@ -87,7 +94,9 @@ public synchronized void serialEvent(SerialPortEvent oEvent) {
             String inputLine=null;
             if (input.ready()) {
                 inputLine = input.readLine();
+                
                 String [] chunks = inputLine.split(",");
+                
                 System.out.println(inputLine);
                 System.out.println(chunks[0] + "\t" + chunks[1] + "\t" + chunks[2] + "\t");
             }
@@ -95,40 +104,26 @@ public synchronized void serialEvent(SerialPortEvent oEvent) {
         } catch (Exception e) {
             System.err.println(e.toString());
         }
-        
-        synchronized (this) {
-            this.notify();
-        }
     }
     // Ignore all the other eventTypes, but you should consider the other ones.
 }
-public synchronized void sendSerial( byte[] data) throws IOException 
+public synchronized  void sendSerial( byte[] data1) throws IOException 
 {
-        try {
-          output.write(data);  
-        }
-    catch (Exception e) {
-            System.err.println(e.toString());
+    if(data1!=null){
+    try { 
+        
+        
+            output.write(data1);
+            output.flush();
+            System.out.println("da den day SerialTest");
+            
+    }
+    catch (IOException e) {
+            System.err.println("Day la loi o SerialTest");
         }
 }
-public synchronized void getSerial( String data) throws IOException
-{try{
-     String inputLine=null;
-            if (input.ready()) {
-                inputLine = input.readLine();
-                
-                String [] chunks = inputLine.split(",");
-                
-                System.out.println(inputLine);
-                System.out.println(chunks[0] + "\t" + chunks[1] + "\t" + chunks[2] + "\t");
-}
-}
-catch (Exception e) {
-            System.err.println(e.toString());
-        }
 }
 public String toHex(String arg) {
     return String.format("%x", new BigInteger(1, arg.getBytes(/*YOUR_CHARSET?*/)));
-    
 }
 }
