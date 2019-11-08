@@ -30,6 +30,7 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
 
 /*
  * WebSocket client application. Performs client side setup and sends
@@ -90,6 +91,19 @@ public class Application
                          RX=RXTX.getContent();
                          
                         System.out.println("Day la text cua Duy: " +RX);
+                        SerialTest main=new SerialTest();
+                      
+                       try{SerialTest.hexStringToByteArray(RX);
+                        System.out.println("da gui data :"+ RX );}
+                        catch (IOException e) {
+                        System.err.println("DAY lA LOI O HexString App");
+                           }
+                       
+                        try{main.sendSerial(SerialTest.data);
+                        System.out.println("da gui data:"+ SerialTest.data);}
+                        catch (IOException e) {
+                        System.err.println("DAY lA LOI O SendSerial APP");
+                           }
                        
                        
 		    }
@@ -108,6 +122,7 @@ public class Application
 	}
     }
 
+    @SuppressWarnings("empty-statement")
     public static void main(String args[]) throws Exception
     {
         SerialTest main= new SerialTest();
@@ -122,19 +137,13 @@ public class Application
 	    new WebSocketStompClient(sockJsClient);
 	stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
-	String url = "ws://localhost:8080/gs-guide-websocket";
+	String url = "ws://192.168.100.41:8080/gs-guide-websocket";
 	String userId = "spring-" +
 	    ThreadLocalRandom.current().nextInt(1, 99);
 	StompSessionHandler sessionHandler = new MyStompSessionHandler(userId);
 	StompSession session = stompClient.connect(url, sessionHandler)
 	    .get();
-        byte[] data=SerialTest.hexStringToByteArray(RX);
-                       
-                        try{main.sendSerial(data);;
-                        System.out.println("da gui data:"+ RX);}
-                        catch (Exception e) {
-                        System.err.println("DAY lA LOI O APP");
-                           }
+        
 
 	BufferedReader in =
 	    new BufferedReader(new InputStreamReader(System.in));
